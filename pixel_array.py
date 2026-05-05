@@ -30,6 +30,42 @@ def max_intensity_projection(pixel_array: np.ndarray, axis=1) -> np.ndarray:
     return np.max(pixel_array, axis=axis)
 
 
+def alpha_fusion(reference: np.ndarray, mask: np.ndarray, alpha: float = 0.25) -> np.ndarray:
+    ref_norm = (reference - reference.min()) / (np.ptp(reference) + 1e-9)
+    mask_norm = (mask - mask.min()) / (np.ptp(mask) + 1e-9)
+
+    reference_cmapped = matplotlib.colormaps["bone"](ref_norm)
+    mask_cmapped = matplotlib.colormaps["hot"](mask_norm)
+
+    return reference_cmapped * (1 - alpha) + mask_cmapped * alpha
+
+def create_gif_rotation(title: str, pixel_array: np.ndarray, aspect: float):
+    n = 60
+
+    fig, ax = plt.subplots(figsize=(12, 4))
+
+    animation_data = []
+    for idx, alpha in enumerate(np.linspace(0, 360 * (n - 1) / n, num=n)):
+        rotated = _rotate_on_axial_plane(pixel_array, alpha)
+        mip_sagittal = max_intensity_projection(rotated, axis=2)
+
+        sagittal_plot = ax.imshow(
+            mip_sagittal,
+            animated=True,
+            cmap=matplotlib.colormaps["bone"],
+            aspect=aspect,
+        )
+
+        animation_data.append([sagittal_plot])
+
+    anim = animation.ArtistAnimation(fig, animation_data, interval=100, blit=True)
+    anim.save(f"{title}.gif")
+
+
+def _rotate_on_axial_plane(pixel_array: np.ndarray, angle_in_degrees: float):
+    return scipy.ndimage.rotate(pixel_array, angle=angle_in_degrees, axes=(1, 2), reshape=False)
+
+
 @dataclass
 class PixelArrayMetadata:
     pixel_spacing: tuple[float, float]
@@ -50,33 +86,6 @@ class PixelArrayMetadata:
 class PixelArray:
     metadata: PixelArrayMetadata
     pixel_array: np.ndarray
-
-    def create_gif_rotation(self, title: str):
-        n = 60
-
-        fig, ax = plt.subplots(figsize=(12, 4))
-
-        animation_data = []
-        for idx, alpha in enumerate(np.linspace(0, 360 * (n - 1) / n, num=n)):
-            rotated = self._rotate_on_axial_plane(alpha)
-            mip_sagittal = max_intensity_projection(rotated, axis=2)
-
-            sagittal_plot = ax.imshow(
-                mip_sagittal,
-                animated=True,
-                cmap=matplotlib.colormaps["bone"],
-                aspect=self.metadata.spacing_between_slices / self.metadata.pixel_spacing[0]
-            )
-
-            animation_data.append([sagittal_plot])
-
-        anim = animation.ArtistAnimation(fig, animation_data, interval=100, blit=True)
-        anim.save(f"{title}.gif")
-
-
-    def _rotate_on_axial_plane(self, angle_in_degrees: float):
-        return scipy.ndimage.rotate(self.pixel_array, angle=angle_in_degrees, axes=(1, 2), reshape=False)
-
 
     def create_median_gif(self, title: str):
         if len(self.pixel_array.shape) < 4:

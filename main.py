@@ -7,7 +7,7 @@ import numpy as np
 import pydicom
 
 from pixel_array import PixelArray, PixelArrayMetadata, median_sagittal_plane, median_coronal_plane, median_axial_plane, \
-    mean_intensity_projection
+    mean_intensity_projection, create_gif_rotation, alpha_fusion
 from tags import TAGS
 
 DATA_PATH = "data"
@@ -79,7 +79,7 @@ def main():
     ax[2].set_title("Axial")
     plt.show()
 
-    rearranged.create_median_gif("medians")
+    #rearranged.create_median_gif("medians")
     dyn_pet_coregistration = mean_intensity_projection(rearranged.pixel_array)
     dyn_pet_coregistration = PixelArray(
         metadata=PixelArrayMetadata.from_dicom(dynamic_pet),
@@ -132,9 +132,28 @@ def main():
     plt.tight_layout()
     plt.show()
 
-    mr.create_gif_rotation("reference_mip_rotation")
-    coregistered_pet.create_gif_rotation("coregistered_mip_rotation")
+    #create_gif_rotation(
+    #    "reference_mip_rotation",
+    #    mr.pixel_array,
+    #    mr.metadata.spacing_between_slices / mr.metadata.pixel_spacing[0]
+    #)
 
+    #create_gif_rotation(
+    #    "coregistered_mip_rotation",
+    #    coregistered_pet.pixel_array,
+    #    coregistered_pet.metadata.spacing_between_slices / coregistered_pet.metadata.pixel_spacing[0]
+    #)
+
+    alpha_fused = alpha_fusion(
+        mr.pixel_array,
+        coregistered_pet.pixel_array
+    )
+
+    create_gif_rotation(
+        "alpha_fused",
+        alpha_fused,
+        mr.metadata.spacing_between_slices / mr.metadata.pixel_spacing[0]
+    )
 
 def coregister(
     reference: PixelArray,
