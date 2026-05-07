@@ -57,6 +57,7 @@ def show_planes_grid(
     if not pixel_arrays:
         raise ValueError("At least one volume is required")
 
+    # Defaulting to the plane aspects of the first pixel_array is fine
     aspects = (aspects_from or pixel_arrays[0][0]).metadata.plane_aspects
 
     fig, axes = plt.subplots(len(pixel_arrays), 3, figsize=(12, 4 * len(pixel_arrays)))
@@ -99,7 +100,6 @@ def show_overlay(
     :param show: whether to show the plot
     :return: Figure and Axes objects of the plot
     """
-    """Overlay the median planes of ``moving`` on ``reference`` with transparency."""
     aspects = (aspects_from or input_).metadata.plane_aspects
     ref_planes = median_planes(reference.pixel_array)
     mov_planes = median_planes(input_.pixel_array)
@@ -126,7 +126,6 @@ def create_median_gif(pixel_array: PixelArray, title: str, cmap: str = "bone"):
     :param title: title of the plot
     :param cmap: colormap to use
     """
-    """Save a GIF cycling through the median planes of each frame of a 4D volume."""
     if pixel_array.pixel_array.ndim < 4:
         raise ValueError("create_median_gif requires a 4D volume (frames, slices, rows, cols)")
 
@@ -166,7 +165,6 @@ def create_rotation_gif(
     :param n_frames: number of frames to generate for the GIF
     :param cmap: colormap to use
     """
-    """Save a GIF rotating ``pixel_array`` around the axial axis and projecting MIPs."""
     fig, ax = plt.subplots(figsize=(12, 4))
     cmap_obj = matplotlib.colormaps[cmap]
 

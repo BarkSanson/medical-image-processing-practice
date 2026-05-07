@@ -34,7 +34,6 @@ def coregister(reference: PixelArray, input_: PixelArray) -> PixelArray:
     :return: a new `PixelArray` with the metadata of the reference image and the
     co-registered pixel array.
     """
-    """Rigid-register ``moving`` onto ``reference`` using mutual information."""
     reference_sitk = sitk.Cast(_to_sitk_image(reference), sitk.sitkFloat32)
     moving_sitk = sitk.Cast(_to_sitk_image(input_), sitk.sitkFloat32)
 
