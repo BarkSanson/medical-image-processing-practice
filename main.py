@@ -34,7 +34,6 @@ def main():
     show_median_planes(last_pet_frame, cmap="hot")
     show_median_planes(mr, cmap="bone")
 
-    # Optional: GIF cycling through the median planes of every PET frame.
     create_median_gif(dynamic_pet, "medians")
 
     # Coregister the temporal mean of the dynamic PET onto the MR.
@@ -48,7 +47,6 @@ def main():
     )
     show_overlay(mr, coregistered_pet, aspects_from=coregistered_pet)
 
-    # Optional: rotation GIFs of the reference MR and coregistered PET.
     create_volume_rotation_gif(mr, "reference_mip_rotation")
     create_volume_rotation_gif(coregistered_pet, "coregistered_mip_rotation")
 
