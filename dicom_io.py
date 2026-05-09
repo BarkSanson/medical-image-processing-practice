@@ -3,7 +3,7 @@ import pydicom
 from pixel_array import PixelArray, PixelArrayMetadata
 
 
-def load_volume(path: str) -> tuple[pydicom.FileDataset, PixelArray]:
+def load_3d_dicom(path: str) -> tuple[pydicom.FileDataset, PixelArray]:
     """
     Reads a DICOM file and wraps it as a 3D ``PixelArray``. The raw
     pydicom dataset is returned as well so the caller can inspect any tag that
