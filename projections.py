@@ -42,18 +42,6 @@ def median_planes(pixel_array: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.n
     )
 
 
-def mean_intensity_projection(pixel_array: np.ndarray, axis: int = 0) -> np.ndarray:
-    """
-    Computes the Mean Intensity Projection of a pixel array along the given
-    axis. When applied to a dynamic PET (4D, with ``axis=0``) it produces a
-    temporal mean volume.
-    :param pixel_array: source pixel array
-    :param axis: axis along which the mean is computed
-    :return: pixel array with one less dimension than the input
-    """
-    return np.mean(pixel_array, axis=axis)
-
-
 def max_intensity_projection(pixel_array: np.ndarray, axis: int = 1) -> np.ndarray:
     """
     Computes the Maximum Intensity Projection (MIP) of a pixel array along

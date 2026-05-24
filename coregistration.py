@@ -47,7 +47,7 @@ def coregister(reference: PixelArray, input_: PixelArray) -> PixelArray:
         reference_sitk,
         moving_sitk,
         sitk.Euler3DTransform(),
-        sitk.CenteredTransformInitializerFilter.MOMENTS,
+        sitk.CenteredTransformInitializerFilter.GEOMETRY,
     )
     method.SetInitialTransform(initial_transform)
 

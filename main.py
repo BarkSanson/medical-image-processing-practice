@@ -5,14 +5,14 @@ import numpy as np
 from coregistration import coregister
 from dicom_io import load_dynamic_pet, load_3d_dicom
 from fusion import alpha_fusion
-from projections import mean_intensity_projection
+from segmentation import segment
 from visualization import (
     create_median_gif,
     create_rotation_gif,
     create_pixel_array_gif,
     show_median_planes,
     show_overlay,
-    show_planes_grid,
+    show_planes_grid, show_masked_tumor,
 )
 
 DATA_PATH = "data"
@@ -46,7 +46,7 @@ def main():
     create_median_gif(dynamic_pet.with_array(np.flip(dynamic_pet.pixel_array)), RESULTS_PATH, "medians", cmap="hot")
 
     # Coregister the temporal mean of the dynamic PET onto the MR.
-    pet_mip = dynamic_pet.with_array(mean_intensity_projection(dynamic_pet.pixel_array))
+    pet_mip = dynamic_pet.with_array(np.mean(dynamic_pet.pixel_array, axis=0))
     coregistered_pet = coregister(mr, pet_mip)
 
     # Side-by-side and overlay views of MR vs. coregistered PET.
@@ -70,6 +70,10 @@ def main():
     # Alpha-fused rotation GIF of MR + coregistered PET.
     alpha_fused = alpha_fusion(flipped_mr.pixel_array, flipped_coregistered_pet.pixel_array)
     create_rotation_gif(alpha_fused, RESULTS_PATH, "alpha_fused", aspect=mr.metadata.sagittal_aspect)
+
+    result = segment(mr.pixel_array)
+
+    show_masked_tumor(mr.pixel_array, result)
 
 
 if __name__ == "__main__":

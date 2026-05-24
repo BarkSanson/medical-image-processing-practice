@@ -5,10 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "huggingface-hub>=1.15.0",
     "matplotlib>=3.10.9",
+    "nninteractive>=1.1.5",
     "numpy>=2.4.4",
     "opencv-python>=4.13.0.92",
     "pydicom>=3.0.2",
+    "pyvista>=0.48.2",
     "scipy>=1.17.1",
     "simpleitk>=2.5.4",
 ]

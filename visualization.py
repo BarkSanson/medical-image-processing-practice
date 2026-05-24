@@ -3,6 +3,7 @@ from typing import Sequence
 
 import matplotlib
 import numpy as np
+import pyvista as pv
 import scipy
 from matplotlib import animation
 from matplotlib import pyplot as plt
@@ -222,3 +223,29 @@ def create_pixel_array_gif(pixel_array: PixelArray, path: str, title: str, n_fra
         n_frames=n_frames,
         cmap=cmap,
     )
+
+
+def show_masked_tumor(mr: np.ndarray, mask: np.ndarray, spacing=(1.0, 1.0, 1.0)):
+    grid = pv.ImageData(
+        dimensions=np.array(mr.shape),  # ImageData uses point dims = cell dims + 1
+        spacing=spacing,
+    )
+    grid.point_data["mr"] = mr.flatten(order="F")
+    grid.point_data["mask"] = mask.astype(np.uint8).flatten(order="F")
+
+    plotter = pv.Plotter()
+    # translucent volume rendering of the MR
+    # softer opacity ramp -> MR appears more translucent so the mask shows through
+    mr_opacity = [0.0, 0.05, 0.12, 0.20, 0.30, 0.40]
+    plotter.add_volume(
+        grid,
+        scalars="mr",
+        cmap="bone",
+        opacity=mr_opacity,
+        opacity_unit_distance=10.0,
+        shade=True,
+    )
+    # opaque isosurface of the mask
+    mask_surface = grid.contour(isosurfaces=[0.5], scalars="mask")
+    plotter.add_mesh(mask_surface, color="red", opacity=1.0, smooth_shading=True)
+    plotter.show()
