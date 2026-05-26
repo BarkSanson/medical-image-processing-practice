@@ -10,6 +10,12 @@ REPO_ID = "nnInteractive/nnInteractive"
 MODEL_NAME = "nnInteractive_v1.0"  # Updated models may be available in the future
 DOWNLOAD_DIR = "./weights/nnInteractive"  # Specify the download directory
 
+SEGMENTATION_BBOX = [
+    [45, 90],
+    [154, 207],
+    [150, 193],
+]
+
 def segment(pixel_array: np.ndarray) -> np.ndarray | None:
     download_path = _download_weights()
 
@@ -24,13 +30,7 @@ def segment(pixel_array: np.ndarray) -> np.ndarray | None:
     target_tensor = torch.zeros(pixel_array.shape)
     session.set_target_buffer(target_tensor)
 
-    bbox = [
-        [45, 90],
-        [150, 193],
-        [154, 207],
-    ]
-
-    session.add_bbox_interaction(bbox, include_interaction=True)
+    session.add_bbox_interaction(SEGMENTATION_BBOX, include_interaction=True)
 
     results = session.target_buffer.clone()
 

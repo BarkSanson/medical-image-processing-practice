@@ -225,7 +225,13 @@ def create_pixel_array_gif(pixel_array: PixelArray, path: str, title: str, n_fra
     )
 
 
-def show_masked_tumor(mr: np.ndarray, mask: np.ndarray, spacing=(1.0, 1.0, 1.0)):
+def show_masked_tumor(
+    mr: np.ndarray,
+    mask: np.ndarray,
+    spacing=(1.0, 1.0, 1.0),
+    bbox: Sequence[Sequence[float]] | None = None,
+    reference_mask: np.ndarray | None = None,
+):
     grid = pv.ImageData(
         dimensions=np.array(mr.shape),  # ImageData uses point dims = cell dims + 1
         spacing=spacing,
@@ -245,7 +251,40 @@ def show_masked_tumor(mr: np.ndarray, mask: np.ndarray, spacing=(1.0, 1.0, 1.0))
         opacity_unit_distance=10.0,
         shade=True,
     )
-    # opaque isosurface of the mask
+    # opaque isosurface of the predicted mask
     mask_surface = grid.contour(isosurfaces=[0.5], scalars="mask")
-    plotter.add_mesh(mask_surface, color="red", opacity=1.0, smooth_shading=True)
+    plotter.add_mesh(
+        mask_surface, color="red", opacity=0.7, smooth_shading=True, label="Prediction"
+    )
+
+    if reference_mask is not None:
+        if reference_mask.shape != mr.shape:
+            raise ValueError(
+                f"reference_mask shape {reference_mask.shape} does not match mr shape {mr.shape}"
+            )
+        grid.point_data["reference"] = reference_mask.astype(np.uint8).flatten(order="F")
+        reference_surface = grid.contour(isosurfaces=[0.5], scalars="reference")
+        plotter.add_mesh(
+            reference_surface,
+            color="green",
+            opacity=0.4,
+            smooth_shading=True,
+            label="Ground truth",
+        )
+        plotter.add_legend()
+
+    if bbox is not None:
+        # bbox is given in array axis order (axis0, axis1, axis2), matching
+        # the ``dimensions`` order passed to ``pv.ImageData`` (i.e. x, y, z
+        # in PyVista's local frame). ``pv.Box`` expects bounds in the form
+        # (xmin, xmax, ymin, ymax, zmin, zmax).
+        (a0_min, a0_max), (a1_min, a1_max), (a2_min, a2_max) = bbox
+        bounds = (
+            a0_min * spacing[0], a0_max * spacing[0],
+            a1_min * spacing[1], a1_max * spacing[1],
+            a2_min * spacing[2], a2_max * spacing[2],
+        )
+        box = pv.Box(bounds=bounds)
+        plotter.add_mesh(box, color="yellow", style="wireframe", line_width=2)
+
     plotter.show()

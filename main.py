@@ -5,7 +5,8 @@ import numpy as np
 from coregistration import coregister
 from dicom_io import load_dynamic_pet, load_3d_dicom
 from fusion import alpha_fusion
-from segmentation import segment
+from metrics import dice, load_nrrd_mask
+from segmentation import segment, SEGMENTATION_BBOX
 from visualization import (
     create_median_gif,
     create_rotation_gif,
@@ -19,6 +20,7 @@ DATA_PATH = "data"
 RESULTS_PATH = "results"
 DYNAMIC_PET_FILE = os.path.join(DATA_PATH, "02324177_s2_e_1_BRAIN_DINAMIC_COLINA_AC_FORISI260916")
 MR_FILE = os.path.join(DATA_PATH, "15252129_s1_AX_3D_T1__C_FSPGR_FORISI260916")
+GROUND_TRUTH_FILE = "Segmentation.nrrd"
 
 
 def main():
@@ -73,7 +75,15 @@ def main():
 
     result = segment(mr.pixel_array)
 
-    show_masked_tumor(mr.pixel_array, result)
+    ground_truth = load_nrrd_mask(GROUND_TRUTH_FILE)
+    print(f"Dice coefficient: {dice(result, ground_truth):.4f}")
+
+    show_masked_tumor(
+        mr.pixel_array,
+        result,
+        bbox=SEGMENTATION_BBOX,
+        reference_mask=ground_truth,
+    )
 
 
 if __name__ == "__main__":
